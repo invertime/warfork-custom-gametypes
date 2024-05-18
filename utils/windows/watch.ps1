@@ -2,12 +2,19 @@
 $folderToWatch = ".\progs\gametypes"
 $filter = "*.*"
 
+# Flag to indicate if the compress script is currently running
+$compressRunning = $false
+
 # Define the action to take when a change is detected
 $action = {
     Write-Host "Change detected in $($event.SourceEventArgs.FullPath)"
-    # Execute the bash script using WSL or Git Bash
-    # Make sure you have WSL installed and the path to the bash executable is correct
-    ./utils/build.sh
+    if (-not $compressRunning) {
+        $compressRunning = $true
+        # Execute the compress script asynchronously
+        Start-Job -ScriptBlock {
+            .\utils\windows\compress.ps1
+        }
+    }
 }
 
 # Create a new FileSystemWatcher
