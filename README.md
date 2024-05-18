@@ -4,10 +4,20 @@ Custom gametypes for warfork
 
 ## How to use
 
-You can use the `utils/build.sh` script (you need to have 7zip installed):
+### For Linux users
+
+You can use the `utils/linux/compress.sh` script (you need to have 7zip installed):
 
 ```bash
-./utils/build.sh
+./utils/linux/compress.sh
+```
+
+### For Windows users
+
+You can use the `utils/linux/compress.sh` script (you need to have 7zip installed):
+
+```bash
+.\utils\windows\compress.ps1
 ```
 
 It will create an archive folder (if it doesn't already exist) where you will be able to found all the pk3 archive (to put in your `basewf` folder)
