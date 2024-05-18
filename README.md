@@ -21,3 +21,7 @@ You can also compress them manually using the following command:
 where `{gametype}` is your desired gametype
 
 > Note for windows users: you need to add the 7zip executable path in your environment variable
+
+## Development
+
+For the windows users, there is the `./utils/watch.ps1` script to automatically execute the `build.sh` script whenever a file is modified in the `prgs/gametypes` directory
