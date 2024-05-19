@@ -37,9 +37,9 @@ void DM_playerKilled( Entity @target, Entity @attacker, Entity @inflictor )
 
     // update player score based on player stats
 
-    target.client.stats.setScore( target.client.stats.frags - target.client.stats.suicides );
+    target.client.stats.setScore( target.client.stats.frags ); // suppr -target.client.stats.suicides
     if ( @attacker != null && @attacker.client != null )
-        attacker.client.stats.setScore( attacker.client.stats.frags - attacker.client.stats.suicides );
+        attacker.client.stats.setScore( attacker.client.stats.frags ); // suppr -target.client.stats.suicides
 
     // drop items
     if ( ( G_PointContents( target.origin ) & CONTENTS_NODROP ) == 0 )
@@ -60,6 +60,11 @@ void DM_playerKilled( Entity @target, Entity @attacker, Entity @inflictor )
     }
     
     award_playerKilled( @target, @attacker,@inflictor );
+    attacker.velocity = attacker.client.velocity * 1.1; // add velocity per kill
+    attacker.mass = attacker.client.mass * 0.9; // lower mass per kill
+    attacker.health = attacker.client.health * 0.5; // lower health per kil
+    attacker.client.inventorySetCount( POWERUP_REGEN, 1); // add regen 
+
 }
 
 ///*****************************************************************
@@ -359,7 +364,7 @@ void GT_SpawnGametype()
 void GT_InitGametype()
 {
     gametype.title = "Custom Free for All";
-    gametype.version = "0.1";
+    gametype.version = "0.1.A";
     gametype.author = "MP2I";
 
     // if the gametype doesn't have a config file, create it
@@ -372,7 +377,7 @@ void GT_InitGametype()
                  + "// This config will be executed each time the gametype is started\n"
                  + "\n\n// map rotation\n"
                  + "set g_maplist \"wfdm1 wfdm2 wfdm4 wfdm5 wfdm6 wfdm7 wfdm8 wfdm9 wfdm10 wfdm11 wfdm12 wfdm13 wfdm14 wfdm16 wfdm17 wfdm18 wfdm19\" // list of maps in automatic rotation\n"
-                 + "set g_maprotation \"1\"   // 0 = same map, 1 = in order, 2 = random\n"
+                 + "set g_maprotation \"2\"   // 0 = same map, 1 = in order, 2 = random\n" // change from 1 to 2
                  + "\n// game settings\n"
                  + "set g_scorelimit \"0\"\n"
                  + "set g_timelimit \"15\"\n"
@@ -414,8 +419,8 @@ void GT_InitGametype()
     gametype.megahealthRespawn = 20;
     gametype.ultrahealthRespawn = 40;
 
-    gametype.readyAnnouncementEnabled = false;
-    gametype.scoreAnnouncementEnabled = false;
+    gametype.readyAnnouncementEnabled = true; // change to true
+    gametype.scoreAnnouncementEnabled = true; // change to true
     gametype.countdownEnabled = false;
     gametype.mathAbortDisabled = false;
     gametype.shootingDisabled = false;
