@@ -1,3 +1,4 @@
+
 /*
 Copyright (C) 2009-2010 Chasseur de bots
 
@@ -61,13 +62,61 @@ void DM_playerKilled( Entity @target, Entity @attacker, Entity @inflictor )
     
     award_playerKilled( @target, @attacker,@inflictor );
 
-    Entity@ ent = attacker;
-
-    ent.velocity = ent.velocity * 1.1; // add velocity per kill
-    ent.mass = ent.mass * 0.9; // lower mass per kill
-    ent.health = ent.health * 0.5; // lower health per kil
+    attacker.velocity = attacker.velocity * 1.5; // add velocity after kill
     attacker.client.inventorySetCount( POWERUP_REGEN, 1); // add regen 
 
+    int ind_score_max = 0;
+    int ind_score_min = 0;
+    bool multiple_top = false;
+    bool multiple_bot = false;
+
+    // seek top and bot player
+    for ( int i = 0; i < maxClients; i++ )
+    {
+        Entity @ent = @G_GetClient( i ).getEnt();
+        Entity @ent2 = @G_GetClient( ind_score_max ).getEnt();
+        Entity @ent3 = @G_GetClient( ind_score_min ).getEnt();
+
+        if ( ent.client.stats.score >= ent2.client.stats.score )
+        {
+            ind_score_max = i;
+            multiple_top = false;
+
+            if ( ent.client.stats.score == ent2.client.stats.score )
+            {
+                multiple_top = true;
+            }
+        }
+
+        if ( ent.client.stats.score <= ent3.client.stats.score )
+        {
+            ind_score_min = i;
+            multiple_bot = false;
+
+            if ( ent.client.stats.score == ent3.client.stats.score )
+            {
+                multiple_bot = true;
+            }
+        }
+    }
+
+    // nerf or buff if top play is attacker
+    Entity @ent1 = @G_GetClient( ind_score_max ).getEnt();
+    Entity @ent2 = @G_GetClient( ind_score_max ).getEnt();
+
+    if ( attacker = ent1 && !multiple_top )
+    {
+        ent1.maxHealth = ent1.maxHealth * 0.75 ;
+
+	if ( target = ent2 && !multiple_bot )
+	{
+	   ent1.maxHealth = ent1.maxHealth * 0.75 ;
+           ent1.angles = ent1.angles * -1 ;
+           
+	   G_PrintMsg( ent1, "You bullied " + ent2.client.name + " and you are nerfed for it. \n" );
+	}
+
+    }
 }
 
 ///*****************************************************************
@@ -276,21 +325,48 @@ void GT_ThinkRules()
     if ( match.getState() >= MATCH_STATE_POSTMATCH )
         return;
 
-	GENERIC_Think();
+    GENERIC_Think();
+
+    int ind_score_min = 0;
+    bool multiple_bot = false;
 
     // check maxHealth rule
     for ( int i = 0; i < maxClients; i++ )
     {
         Entity @ent = @G_GetClient( i ).getEnt();
+        Entity @ent3 = @G_GetClient( ind_score_min ).getEnt();
+
         if ( ent.client.state() >= CS_SPAWNED && ent.team != TEAM_SPECTATOR )
         {
             if ( ent.health > ent.maxHealth ) {
                 ent.health -= ( frameTime * 0.001f );
-				// fix possible rounding errors
-				if( ent.health < ent.maxHealth ) {
-					ent.health = ent.maxHealth;
-				}
-			}
+                // fix possible rounding errors
+                if( ent.health < ent.maxHealth ) {
+                    ent.health = ent.maxHealth;
+                }
+            }
+        }
+
+        if ( ent.client.stats.score <= ent3.client.stats.score )
+        {
+            ind_score_min = i;
+            multiple_bot = false;
+
+            if ( ent.client.stats.score == ent3.client.stats.score )
+            {
+                multiple_bot = true;
+            }
+        }
+
+    }
+
+    for ( int i = 0; i < maxClients; i++ )
+    {
+        Entity @ent = @G_GetClient( i ).getEnt();
+
+        if ( i == ind_score_min && !multiple_bot )
+        {
+            ent.client.inventorySetCount( POWERUP_SHELL, 1 );
         }
     }
 }
