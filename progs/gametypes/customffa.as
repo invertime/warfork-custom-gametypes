@@ -1,4 +1,3 @@
-
 /*
 Copyright (C) 2009-2010 Chasseur de bots
 
@@ -22,160 +21,169 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /// NEW MAP ENTITY DEFINITIONS
 ///*****************************************************************
 
-
 ///*****************************************************************
 /// LOCAL FUNCTIONS
 ///*****************************************************************
 
 // a player has just died. The script is warned about it so it can account scores
-void DM_playerKilled( Entity @target, Entity @attacker, Entity @inflictor )
+void DM_playerKilled(Entity @target, Entity @attacker, Entity @inflictor)
 {
-    if ( match.getState() != MATCH_STATE_PLAYTIME )
-        return;
+	if (match.getState() != MATCH_STATE_PLAYTIME)
+		return;
 
-    if ( @target.client == null )
-        return;
+	if (@target.client == null)
+		return;
 
-    // update player score based on player stats
+	// update player score based on player stats
 
-    target.client.stats.setScore( target.client.stats.frags ); // suppr -target.client.stats.suicides
-    if ( @attacker != null && @attacker.client != null )
-        attacker.client.stats.setScore( attacker.client.stats.frags ); // suppr -target.client.stats.suicides
+	target.client.stats.setScore(target.client.stats.frags);		 // suppr -target.client.stats.suicides
+	if (@attacker != null && @attacker.client != null)
+		attacker.client.stats.setScore(attacker.client.stats.frags); // suppr -target.client.stats.suicides
 
-    // drop items
-    if ( ( G_PointContents( target.origin ) & CONTENTS_NODROP ) == 0 )
-    {
-        target.dropItem( AMMO_PACK );
-
-        if ( target.client.inventoryCount( POWERUP_QUAD ) > 0 )
-        {
-            target.dropItem( POWERUP_QUAD );
-            target.client.inventorySetCount( POWERUP_QUAD, 0 );
-        }
-
-        if ( target.client.inventoryCount( POWERUP_SHELL ) > 0 )
-        {
-            target.dropItem( POWERUP_SHELL );
-            target.client.inventorySetCount( POWERUP_SHELL, 0 );
-        }
-    }
-    
-    award_playerKilled( @target, @attacker,@inflictor );
-
-    attacker.velocity = attacker.velocity * 1.5; // add velocity after kill
-    attacker.client.inventorySetCount( POWERUP_REGEN, 1); // add regen 
-
-    int ind_score_max = 0;
-    int ind_score_min = 0;
-    bool multiple_top = false;
-    bool multiple_bot = false;
-
-    // seek top and bot player
-    for ( int i = 0; i < maxClients; i++ )
-    {
-        Entity @ent = @G_GetClient( i ).getEnt();
-        Entity @ent2 = @G_GetClient( ind_score_max ).getEnt();
-        Entity @ent3 = @G_GetClient( ind_score_min ).getEnt();
-
-        if ( ent.client.stats.score >= ent2.client.stats.score )
-        {
-            ind_score_max = i;
-            multiple_top = false;
-
-            if ( ent.client.stats.score == ent2.client.stats.score )
-            {
-                multiple_top = true;
-            }
-        }
-
-        if ( ent.client.stats.score <= ent3.client.stats.score )
-        {
-            ind_score_min = i;
-            multiple_bot = false;
-
-            if ( ent.client.stats.score == ent3.client.stats.score )
-            {
-                multiple_bot = true;
-            }
-        }
-    }
-
-    // nerf or buff if top play is attacker
-    Entity @ent1 = @G_GetClient( ind_score_max ).getEnt();
-    Entity @ent2 = @G_GetClient( ind_score_max ).getEnt();
-
-    if ( attacker = ent1 && !multiple_top )
-    {
-        ent1.maxHealth = ent1.maxHealth * 0.75 ;
-
-	if ( target = ent2 && !multiple_bot )
+	// drop items
+	if ((G_PointContents(target.origin) & CONTENTS_NODROP) == 0)
 	{
-	   ent1.maxHealth = ent1.maxHealth * 0.75 ;
-           ent1.angles = ent1.angles * -1 ;
-           
-	   G_PrintMsg( ent1, "You bullied " + ent2.client.name + " and you are nerfed for it. \n" );
+		target.dropItem(AMMO_PACK);
+
+		if (target.client.inventoryCount(POWERUP_QUAD) > 0)
+		{
+			target.dropItem(POWERUP_QUAD);
+			target.client.inventorySetCount(POWERUP_QUAD, 0);
+		}
+
+		if (target.client.inventoryCount(POWERUP_SHELL) > 0)
+		{
+			target.dropItem(POWERUP_SHELL);
+			target.client.inventorySetCount(POWERUP_SHELL, 0);
+		}
 	}
 
-    }
+	award_playerKilled(@target, @attacker, @inflictor);
+
+	// attacker.velocity = attacker.velocity * 1.5;		 // add velocity after kill
+
+	int ind_score_max = 0;
+	int ind_score_min = 0;
+	bool multiple_top = false;
+	bool multiple_bot = false;
+
+	// seek top and bot player
+	for (int i = 0; i < maxClients; i++)
+	{
+		Client @cli = @G_GetClient(i);
+		Client @cliMax = @G_GetClient(ind_score_max);
+		Client @cliMin = @G_GetClient(ind_score_min);
+
+		if (cli.stats.score >= cliMax.stats.score)
+		{
+			ind_score_max = i;
+			multiple_top = false;
+
+			if (cli.stats.score == cliMax.stats.score)
+			{
+				// multiple_top = true;
+			}
+		}
+
+		if (cli.stats.score <= cliMin.stats.score)
+		{
+			ind_score_min = i;
+			multiple_bot = false;
+
+			if (cli.stats.score == cliMin.stats.score)
+			{
+				// multiple_bot = true;
+			}
+		}
+	}
+
+	// nerf or buff if top play is attacker
+	Client @cliMax = @G_GetClient(ind_score_max);
+	Client @cliMin = @G_GetClient(ind_score_min);
+
+	G_PrintMsg(attacker, "hello there");
+
+
+	if (attacker.client.playerNum == cliMax.playerNum && !multiple_top){
+        if (attacker.maxHealth > 10){
+		    attacker.maxHealth = attacker.maxHealth * 0.75;
+        } else {
+            attacker.maxHealth = 10;
+        }
+		G_PrintMsg(attacker, "You killed" + target.client.name + " and you are nerfed for it. \n");
+
+
+		if (target.client.playerNum == cliMin.playerNum && !multiple_bot)
+		{
+            if (attacker.maxHealth > 10){
+		        attacker.maxHealth = attacker.maxHealth * 0.75;
+                if (attacker.maxHealth > 10) {
+                    attacker.maxHealth = 10;
+                }
+            }
+			attacker.angles = attacker.angles * -1;
+			G_PrintMsg(attacker, "You bullied " + target.client.name + " and you are nerfed for it. \n");
+		}
+	}
 }
 
 ///*****************************************************************
 /// MODULE SCRIPT CALLS
 ///*****************************************************************
 
-bool GT_Command( Client @client, const String &cmdString, const String &argsString, int argc )
+bool GT_Command(Client @client, const String& cmdString, const String& argsString, int argc)
 {
-    if ( cmdString == "drop" )
-    {
-        String token;
+	if (cmdString == "drop")
+	{
+		String token;
 
-        for ( int i = 0; i < argc; i++ )
-        {
-            token = argsString.getToken( i );
-            if ( token.len() == 0 )
-                break;
+		for (int i = 0; i < argc; i++)
+		{
+			token = argsString.getToken(i);
+			if (token.len() == 0)
+				break;
 
-            if ( token == "weapon" || token == "fullweapon" )
-            {
-                GENERIC_DropCurrentWeapon( client, true );
-            }
-            else if ( token == "strong" )
-            {
-                GENERIC_DropCurrentAmmoStrong( client );
-            }
-            else
-            {
-                GENERIC_CommandDropItem( client, token );
-            }
-        }
+			if (token == "weapon" || token == "fullweapon")
+			{
+				GENERIC_DropCurrentWeapon(client, true);
+			}
+			else if (token == "strong")
+			{
+				GENERIC_DropCurrentAmmoStrong(client);
+			}
+			else
+			{
+				GENERIC_CommandDropItem(client, token);
+			}
+		}
 
-        return true;
-    }
-    else if ( cmdString == "cvarinfo" )
-    {
-        GENERIC_CheatVarResponse( client, cmdString, argsString, argc );
-        return true;
-    }
-    // example of registered command
-    else if ( cmdString == "gametype" )
-    {
-        String response = "";
-		Cvar fs_game( "fs_game", "", 0 );
+		return true;
+	}
+	else if (cmdString == "cvarinfo")
+	{
+		GENERIC_CheatVarResponse(client, cmdString, argsString, argc);
+		return true;
+	}
+	// example of registered command
+	else if (cmdString == "gametype")
+	{
+		String response = "";
+		Cvar fs_game("fs_game", "", 0);
 		String manifest = gametype.manifest;
 
-        response += "\n";
-        response += "Gametype " + gametype.name + " : " + gametype.title + "\n";
-        response += "----------------\n";
-        response += "Version: " + gametype.version + "\n";
-        response += "Author: " + gametype.author + "\n";
-        response += "Mod: " + fs_game.string + (!manifest.empty() ? " (manifest: " + manifest + ")" : "") + "\n";
-        response += "----------------\n";
+		response += "\n";
+		response += "Gametype " + gametype.name + " : " + gametype.title + "\n";
+		response += "----------------\n";
+		response += "Version: " + gametype.version + "\n";
+		response += "Author: " + gametype.author + "\n";
+		response += "Mod: " + fs_game.string + (!manifest.empty() ? " (manifest: " + manifest + ")" : "") + "\n";
+		response += "----------------\n";
 
-        G_PrintMsg( client.getEnt(), response );
-        return true;
-    }
+		G_PrintMsg(client.getEnt(), response);
+		return true;
+	}
 
-    return false;
+	return false;
 }
 
 // When this function is called the weights of items have been reset to their default values,
@@ -183,245 +191,241 @@ bool GT_Command( Client @client, const String &cmdString, const String &argsStri
 // on the current bot status.
 // Player, and non-item entities don't have any weight set. So they will be ignored by the bot
 // unless a weight is assigned here.
-bool GT_UpdateBotStatus( Entity @self )
+bool GT_UpdateBotStatus(Entity @self)
 {
-    return GENERIC_UpdateBotStatus( self );
+	return GENERIC_UpdateBotStatus(self);
 }
 
 // select a spawning point for a player
-Entity @GT_SelectSpawnPoint( Entity @self )
+Entity @GT_SelectSpawnPoint(Entity @self)
 {
-    return GENERIC_SelectBestRandomSpawnPoint( self, "info_player_deathmatch" );
+	return GENERIC_SelectBestRandomSpawnPoint(self, "info_player_deathmatch");
 }
 
-String @GT_ScoreboardMessage( uint maxlen )
+String @GT_ScoreboardMessage(uint maxlen)
 {
-    String scoreboardMessage = "";
-    String entry;
-    Team @team;
-    Entity @ent;
-    int i;
+	String scoreboardMessage = "";
+	String entry;
+	Team @team;
+	Entity @ent;
+	int i;
 
-    @team = @G_GetTeam( TEAM_PLAYERS );
+	@team = @G_GetTeam(TEAM_PLAYERS);
 
-    // &t = team tab, team tag, team score (doesn't apply), team ping (doesn't apply)
-    entry = "&t " + int( TEAM_PLAYERS ) + " " + team.stats.score + " 0 ";
-    if ( scoreboardMessage.len() + entry.len() < maxlen )
-        scoreboardMessage += entry;
+	// &t = team tab, team tag, team score (doesn't apply), team ping (doesn't apply)
+	entry = "&t " + int(TEAM_PLAYERS) + " " + team.stats.score + " 0 ";
+	if (scoreboardMessage.len() + entry.len() < maxlen)
+		scoreboardMessage += entry;
 
-    for ( i = 0; @team.ent( i ) != null; i++ )
-    {
-        @ent = @team.ent( i );
+	for (i = 0; @team.ent(i) != null; i++)
+	{
+		@ent = @team.ent(i);
 
-		int playerID = ( ent.isGhosting() && ( match.getState() == MATCH_STATE_PLAYTIME ) ) ? -( ent.playerNum + 1 ) : ent.playerNum;
+		int playerID = (ent.isGhosting() && (match.getState() == MATCH_STATE_PLAYTIME)) ? -(ent.playerNum + 1) : ent.playerNum;
 
-        // "AVATAR Name Clan Score Ping R"
-        entry = "&p " + playerID + " " + playerID + " "
-                + ent.client.clanName + " "
-                + ent.client.stats.score + " "
-                + ent.client.ping + " "
-                + ( ent.client.isReady() ? "1" : "0" ) + " ";
+		// "AVATAR Name Clan Score Ping R"
+		entry = "&p " + playerID + " " + playerID + " " + ent.client.clanName + " " + ent.client.stats.score + " " + ent.client.ping + " " + (ent.client.isReady() ? "1" : "0") + " ";
 
-        if ( scoreboardMessage.len() + entry.len() < maxlen )
-            scoreboardMessage += entry;
-    }
+		if (scoreboardMessage.len() + entry.len() < maxlen)
+			scoreboardMessage += entry;
+	}
 
-    return scoreboardMessage;
+	return scoreboardMessage;
 }
 
 // Some game actions trigger score events. These are events not related to killing
 // oponents, like capturing a flag
 // Warning: client can be null
-void GT_ScoreEvent( Client @client, const String &score_event, const String &args )
+void GT_ScoreEvent(Client @client, const String& score_event, const String& args)
 {
-    if ( score_event == "dmg" )
-    {
-    }
-    else if ( score_event == "kill" )
-    {
-        Entity @attacker = null;
+	if (score_event == "dmg")
+	{
+	}
+	else if (score_event == "kill")
+	{
+		Entity @attacker = null;
 
-        if ( @client != null )
-            @attacker = @client.getEnt();
+		if (@client != null)
+			@attacker = @client.getEnt();
 
-        int arg1 = args.getToken( 0 ).toInt();
-        int arg2 = args.getToken( 1 ).toInt();
+		int arg1 = args.getToken(0).toInt();
+		int arg2 = args.getToken(1).toInt();
 
-        // target, attacker, inflictor
-        DM_playerKilled( G_GetEntity( arg1 ), attacker, G_GetEntity( arg2 ) );
-    }
-    else if ( score_event == "award" )
-    {
-    }
+		// target, attacker, inflictor
+		DM_playerKilled(G_GetEntity(arg1), attacker, G_GetEntity(arg2));
+	}
+	else if (score_event == "award")
+	{
+	}
 }
 
 // a player is being respawned. This can happen from several ways, as dying, changing team,
 // being moved to ghost state, be placed in respawn queue, being spawned from spawn queue, etc
-void GT_PlayerRespawn( Entity @ent, int old_team, int new_team )
+void GT_PlayerRespawn(Entity @ent, int old_team, int new_team)
 {
-    if ( ent.isGhosting() )
-        return;
+	if (ent.isGhosting())
+		return;
 
-    if ( gametype.isInstagib )
-    {
-        ent.client.inventoryGiveItem( WEAP_INSTAGUN );
-        ent.client.inventorySetCount( AMMO_INSTAS, 1 );
-        ent.client.inventorySetCount( AMMO_WEAK_INSTAS, 1 );
-    }
-    else
-    {
-        Item @item;
-        Item @ammoItem;
+	if (gametype.isInstagib)
+	{
+		ent.client.inventoryGiveItem(WEAP_INSTAGUN);
+		ent.client.inventorySetCount(AMMO_INSTAS, 1);
+		ent.client.inventorySetCount(AMMO_WEAK_INSTAS, 1);
+	}
+	else
+	{
+		Item @item;
+		Item @ammoItem;
 
-        // the gunblade can't be given (because it can't be dropped)
-        ent.client.inventorySetCount( WEAP_GUNBLADE, 1 );
-        ent.client.inventorySetCount( AMMO_GUNBLADE, 1 ); // enable gunblade blast
+		// the gunblade can't be given (because it can't be dropped)
+		ent.client.inventorySetCount(WEAP_GUNBLADE, 1);
+		ent.client.inventorySetCount(AMMO_GUNBLADE, 1); // enable gunblade blast
 
-        // give all weapons
-        for ( int i = WEAP_GUNBLADE + 1; i < WEAP_TOTAL; i++ )
-        {
-            if ( i == WEAP_INSTAGUN ) // dont add instagun...
-                continue;
+		// give all weapons
+		for (int i = WEAP_GUNBLADE + 1; i < WEAP_TOTAL; i++)
+		{
+			if (i == WEAP_INSTAGUN) // dont add instagun...
+				continue;
 
-            ent.client.inventoryGiveItem( i );
+			ent.client.inventoryGiveItem(i);
 
-            if ( match.getState() <= MATCH_STATE_WARMUP )
-            {
-                @item = @G_GetItem( i );
+			if (match.getState() <= MATCH_STATE_WARMUP)
+			{
+				@item = @G_GetItem(i);
 
-                @ammoItem = item.weakAmmoTag == AMMO_NONE ? null : @G_GetItem( item.weakAmmoTag );
-                if ( @ammoItem != null )
-                    ent.client.inventorySetCount( ammoItem.tag, ammoItem.inventoryMax );
+				@ammoItem = item.weakAmmoTag == AMMO_NONE ? null : @G_GetItem(item.weakAmmoTag);
+				if (@ammoItem != null)
+					ent.client.inventorySetCount(ammoItem.tag, ammoItem.inventoryMax);
 
-                @ammoItem = @G_GetItem( item.ammoTag );
-                if ( @ammoItem != null )
-                    ent.client.inventorySetCount( ammoItem.tag, ammoItem.inventoryMax );
-            }
-        }
+				@ammoItem = @G_GetItem(item.ammoTag);
+				if (@ammoItem != null)
+					ent.client.inventorySetCount(ammoItem.tag, ammoItem.inventoryMax);
+			}
+		}
 
-        if ( match.getState() <= MATCH_STATE_WARMUP )
-        {
-            ent.client.inventoryGiveItem( ARMOR_YA );
-			ent.client.inventoryGiveItem( ARMOR_YA );
-        }
+		if (match.getState() <= MATCH_STATE_WARMUP)
+		{
+			ent.client.inventoryGiveItem(ARMOR_YA);
+			ent.client.inventoryGiveItem(ARMOR_YA);
+		}
 		else
 		{
 			ent.health = ent.maxHealth * 1.25;
 		}
-    }
+	}
 
-	ent.client.selectWeapon( -1 ); // auto-select best weapon in the inventory
+	ent.client.selectWeapon(-1); // auto-select best weapon in the inventory
 
-    // add a teleportation effect
-    ent.respawnEffect();
+	// add a teleportation effect
+	ent.respawnEffect();
 }
 
 // Thinking function. Called each frame
 void GT_ThinkRules()
 {
-    if ( match.scoreLimitHit() || match.timeLimitHit() || match.suddenDeathFinished() )
-        match.launchState( match.getState() + 1 );
+	if (match.scoreLimitHit() || match.timeLimitHit() || match.suddenDeathFinished())
+		match.launchState(match.getState() + 1);
 
-    if ( match.getState() >= MATCH_STATE_POSTMATCH )
-        return;
+	if (match.getState() >= MATCH_STATE_POSTMATCH)
+		return;
 
-    GENERIC_Think();
+	GENERIC_Think();
 
-    int ind_score_min = 0;
-    bool multiple_bot = false;
+	int ind_score_min = 0;
+	bool multiple_bot = false;
 
-    // check maxHealth rule
-    for ( int i = 0; i < maxClients; i++ )
-    {
-        Entity @ent = @G_GetClient( i ).getEnt();
-        Entity @ent3 = @G_GetClient( ind_score_min ).getEnt();
+	// check maxHealth rule
+	for (int i = 0; i < maxClients; i++)
+	{
+		Entity @ent = @G_GetClient(i).getEnt();
+		Entity @ent3 = @G_GetClient(ind_score_min).getEnt();
 
-        if ( ent.client.state() >= CS_SPAWNED && ent.team != TEAM_SPECTATOR )
-        {
-            if ( ent.health > ent.maxHealth ) {
-                ent.health -= ( frameTime * 0.001f );
-                // fix possible rounding errors
-                if( ent.health < ent.maxHealth ) {
-                    ent.health = ent.maxHealth;
-                }
-            }
-        }
+		if (ent.client.state() >= CS_SPAWNED && ent.team != TEAM_SPECTATOR)
+		{
+			if (ent.health > ent.maxHealth)
+			{
+				ent.health -= (frameTime * 0.001f);
+				// fix possible rounding errors
+				if (ent.health < ent.maxHealth)
+				{
+					ent.health = ent.maxHealth;
+				}
+			}
+		}
 
-        if ( ent.client.stats.score <= ent3.client.stats.score )
-        {
-            ind_score_min = i;
-            multiple_bot = false;
+		if (ent.client.stats.score <= ent3.client.stats.score)
+		{
+			ind_score_min = i;
+			multiple_bot = false;
 
-            if ( ent.client.stats.score == ent3.client.stats.score )
-            {
-                multiple_bot = true;
-            }
-        }
+			if (ent.client.stats.score == ent3.client.stats.score)
+			{
+				multiple_bot = true;
+			}
+		}
+	}
 
-    }
+	for (int i = 0; i < maxClients; i++)
+	{
+		Entity @ent = @G_GetClient(i).getEnt();
 
-    for ( int i = 0; i < maxClients; i++ )
-    {
-        Entity @ent = @G_GetClient( i ).getEnt();
-
-        if ( i == ind_score_min && !multiple_bot )
-        {
-            ent.client.inventorySetCount( POWERUP_SHELL, 1 );
-        }
-    }
+		if (i == ind_score_min && !multiple_bot)
+		{
+			ent.client.inventorySetCount(POWERUP_SHELL, 1);
+		}
+	}
 }
 
 // The game has detected the end of the match state, but it
 // doesn't advance it before calling this function.
 // This function must give permission to move into the next
 // state by returning true.
-bool GT_MatchStateFinished( int incomingMatchState )
+bool GT_MatchStateFinished(int incomingMatchState)
 {
-    if ( match.getState() <= MATCH_STATE_WARMUP && incomingMatchState > MATCH_STATE_WARMUP
-            && incomingMatchState < MATCH_STATE_POSTMATCH )
-        match.startAutorecord();
+	if (match.getState() <= MATCH_STATE_WARMUP && incomingMatchState > MATCH_STATE_WARMUP && incomingMatchState < MATCH_STATE_POSTMATCH)
+		match.startAutorecord();
 
-    if ( match.getState() == MATCH_STATE_POSTMATCH )
-        match.stopAutorecord();
+	if (match.getState() == MATCH_STATE_POSTMATCH)
+		match.stopAutorecord();
 
-    return true;
+	return true;
 }
 
 // the match state has just moved into a new state. Here is the
 // place to set up the new state rules
 void GT_MatchStateStarted()
 {
-    switch ( match.getState() )
-    {
-    case MATCH_STATE_WARMUP:
-        gametype.pickableItemsMask = gametype.spawnableItemsMask;
-        gametype.dropableItemsMask = gametype.spawnableItemsMask;
-        GENERIC_SetUpWarmup();
-		SpawnIndicators::Create( "info_player_deathmatch", TEAM_PLAYERS );
-        break;
+	switch (match.getState())
+	{
+		case MATCH_STATE_WARMUP:
+			gametype.pickableItemsMask = gametype.spawnableItemsMask;
+			gametype.dropableItemsMask = gametype.spawnableItemsMask;
+			GENERIC_SetUpWarmup();
+			SpawnIndicators::Create("info_player_deathmatch", TEAM_PLAYERS);
+			break;
 
-    case MATCH_STATE_COUNTDOWN:
-        gametype.pickableItemsMask = 0; // disallow item pickup
-        gametype.dropableItemsMask = 0; // disallow item drop
-        GENERIC_SetUpCountdown();
-		SpawnIndicators::Delete();
-        break;
+		case MATCH_STATE_COUNTDOWN:
+			gametype.pickableItemsMask = 0; // disallow item pickup
+			gametype.dropableItemsMask = 0; // disallow item drop
+			GENERIC_SetUpCountdown();
+			SpawnIndicators::Delete();
+			break;
 
-    case MATCH_STATE_PLAYTIME:
-        gametype.pickableItemsMask = gametype.spawnableItemsMask;
-        gametype.dropableItemsMask = gametype.spawnableItemsMask;
-        GENERIC_SetUpMatch();
-        break;
+		case MATCH_STATE_PLAYTIME:
+			gametype.pickableItemsMask = gametype.spawnableItemsMask;
+			gametype.dropableItemsMask = gametype.spawnableItemsMask;
+			GENERIC_SetUpMatch();
+			break;
 
-    case MATCH_STATE_POSTMATCH:
-        gametype.pickableItemsMask = 0; // disallow item pickup
-        gametype.dropableItemsMask = 0; // disallow item drop
-        GENERIC_SetUpEndMatch();
-        break;
+		case MATCH_STATE_POSTMATCH:
+			gametype.pickableItemsMask = 0; // disallow item pickup
+			gametype.dropableItemsMask = 0; // disallow item drop
+			GENERIC_SetUpEndMatch();
+			break;
 
-    default:
-        break;
-    }
+		default:
+			break;
+	}
 }
 
 // the gametype is shutting down cause of a match restart or map change
@@ -442,90 +446,73 @@ void GT_SpawnGametype()
 
 void GT_InitGametype()
 {
-    gametype.title = "Custom Free for All";
-    gametype.version = "0.1.A";
-    gametype.author = "MP2I";
+	gametype.title = "Custom Free for All";
+	gametype.version = "0.1.A";
+	gametype.author = "MP2I";
 
-    // if the gametype doesn't have a config file, create it
-    if ( !G_FileExists( "configs/server/gametypes/" + gametype.name + ".cfg" ) )
-    {
-        String config;
+	// if the gametype doesn't have a config file, create it
+	if (!G_FileExists("configs/server/gametypes/" + gametype.name + ".cfg"))
+	{
+		String config;
 
-        // the config file doesn't exist or it's empty, create it
-        config = "// '" + gametype.title + "' gametype configuration file\n"
-                 + "// This config will be executed each time the gametype is started\n"
-                 + "\n\n// map rotation\n"
-                 + "set g_maplist \"wfdm1 wfdm2 wfdm4 wfdm5 wfdm6 wfdm7 wfdm8 wfdm9 wfdm10 wfdm11 wfdm12 wfdm13 wfdm14 wfdm16 wfdm17 wfdm18 wfdm19\" // list of maps in automatic rotation\n"
-                 + "set g_maprotation \"2\"   // 0 = same map, 1 = in order, 2 = random\n" // change from 1 to 2
-                 + "\n// game settings\n"
-                 + "set g_scorelimit \"0\"\n"
-                 + "set g_timelimit \"15\"\n"
-                 + "set g_warmup_timelimit \"1\"\n"
-                 + "set g_match_extendedtime \"0\"\n"
-                 + "set g_allow_falldamage \"0\"\n"
-                 + "set g_allow_selfdamage \"0\"\n"
-                 + "set g_allow_teamdamage \"0\"\n"
-                 + "set g_allow_stun \"1\"\n"
-                 + "set g_teams_maxplayers \"0\"\n"
-                 + "set g_teams_allow_uneven \"0\"\n"
-                 + "set g_countdown_time \"5\"\n"
-                 + "set g_maxtimeouts \"3\" // -1 = unlimited\n"
-                 + "\necho \"" + gametype.name + ".cfg executed\"\n";
+		// the config file doesn't exist or it's empty, create it
+		config = "// '" + gametype.title + "' gametype configuration file\n" + "// This config will be executed each time the gametype is started\n" + "\n\n// map rotation\n" + "set g_maplist \"wfdm1 wfdm2 wfdm4 wfdm5 wfdm6 wfdm7 wfdm8 wfdm9 wfdm10 wfdm11 wfdm12 wfdm13 wfdm14 wfdm16 wfdm17 wfdm18 wfdm19\" // list of maps in automatic rotation\n" + "set g_maprotation \"2\"   // 0 = same map, 1 = in order, 2 = random\n" // change from 1 to 2
+				 + "\n// game settings\n" + "set g_scorelimit \"0\"\n" + "set g_timelimit \"15\"\n" + "set g_warmup_timelimit \"1\"\n" + "set g_match_extendedtime \"0\"\n" + "set g_allow_falldamage \"0\"\n" + "set g_allow_selfdamage \"0\"\n" + "set g_allow_teamdamage \"0\"\n" + "set g_allow_stun \"1\"\n" + "set g_teams_maxplayers \"0\"\n" + "set g_teams_allow_uneven \"0\"\n" + "set g_countdown_time \"5\"\n" + "set g_maxtimeouts \"3\" // -1 = unlimited\n" + "\necho \"" + gametype.name + ".cfg executed\"\n";
 
-        G_WriteFile( "configs/server/gametypes/" + gametype.name + ".cfg", config );
-        G_Print( "Created default config file for '" + gametype.name + "'\n" );
-        G_CmdExecute( "exec configs/server/gametypes/" + gametype.name + ".cfg silent" );
-    }
+		G_WriteFile("configs/server/gametypes/" + gametype.name + ".cfg", config);
+		G_Print("Created default config file for '" + gametype.name + "'\n");
+		G_CmdExecute("exec configs/server/gametypes/" + gametype.name + ".cfg silent");
+	}
 
-    gametype.spawnableItemsMask = ( IT_AMMO | IT_ARMOR | IT_POWERUP | IT_HEALTH );
-    if ( gametype.isInstagib )
-        gametype.spawnableItemsMask &= ~uint(G_INSTAGIB_NEGATE_ITEMMASK);
+	gametype.spawnableItemsMask = (IT_AMMO | IT_ARMOR | IT_POWERUP | IT_HEALTH);
+	if (gametype.isInstagib)
+		gametype.spawnableItemsMask &= ~uint(G_INSTAGIB_NEGATE_ITEMMASK);
 
-    gametype.respawnableItemsMask = gametype.spawnableItemsMask;
-    gametype.dropableItemsMask = gametype.spawnableItemsMask;
-    gametype.pickableItemsMask = gametype.spawnableItemsMask;
+	gametype.respawnableItemsMask = gametype.spawnableItemsMask;
+	gametype.dropableItemsMask = gametype.spawnableItemsMask;
+	gametype.pickableItemsMask = gametype.spawnableItemsMask;
 
-    gametype.isTeamBased = false;
-    gametype.isRace = false;
-    gametype.hasChallengersQueue = false;
-    gametype.maxPlayersPerTeam = 0;
+	gametype.isTeamBased = false;
+	gametype.isRace = false;
+	gametype.hasChallengersQueue = false;
+	gametype.maxPlayersPerTeam = 0;
 
-    gametype.ammoRespawn = 20;
-    gametype.armorRespawn = 25;
-    gametype.weaponRespawn = 5;
-    gametype.healthRespawn = 25;
-    gametype.powerupRespawn = 90;
-    gametype.megahealthRespawn = 20;
-    gametype.ultrahealthRespawn = 40;
+	gametype.ammoRespawn = 20;
+	gametype.armorRespawn = 25;
+	gametype.weaponRespawn = 5;
+	gametype.healthRespawn = 25;
+	gametype.powerupRespawn = 90;
+	gametype.megahealthRespawn = 20;
+	gametype.ultrahealthRespawn = 40;
 
-    gametype.readyAnnouncementEnabled = true; // change to true
-    gametype.scoreAnnouncementEnabled = true; // change to true
-    gametype.countdownEnabled = false;
-    gametype.mathAbortDisabled = false;
-    gametype.shootingDisabled = false;
-    gametype.infiniteAmmo = false;
-    gametype.canForceModels = true;
-    gametype.canShowMinimap = false;
-    gametype.teamOnlyMinimap = false;
+	gametype.readyAnnouncementEnabled = true; // change to true
+	gametype.scoreAnnouncementEnabled = true; // change to true
+	gametype.countdownEnabled = false;
+	gametype.mathAbortDisabled = false;
+	gametype.shootingDisabled = false;
+	gametype.infiniteAmmo = false;
+	gametype.canForceModels = true;
+	gametype.canShowMinimap = false;
+	gametype.teamOnlyMinimap = false;
 
 	gametype.mmCompatible = true;
-	
-    gametype.spawnpointRadius = 256;
 
-    if ( gametype.isInstagib )
-        gametype.spawnpointRadius *= 2;
+	gametype.spawnpointRadius = 256;
 
-    // set spawnsystem type
-    for ( int team = TEAM_PLAYERS; team < GS_MAX_TEAMS; team++ )
-        gametype.setTeamSpawnsystem( team, SPAWNSYSTEM_INSTANT, 0, 0, false );
+	if (gametype.isInstagib)
+		gametype.spawnpointRadius *= 2;
 
-    // define the scoreboard layout
-    G_ConfigString( CS_SCB_PLAYERTAB_LAYOUT, "%a l1 %n 112 %s 52 %i 52 %l 48 %r l1" );
-    G_ConfigString( CS_SCB_PLAYERTAB_TITLES, "AVATAR Name Clan Score Ping R" );
+	// set spawnsystem type
+	for (int team = TEAM_PLAYERS; team < GS_MAX_TEAMS; team++)
+		gametype.setTeamSpawnsystem(team, SPAWNSYSTEM_INSTANT, 0, 0, false);
 
-    // add commands
-    G_RegisterCommand( "drop" );
-    G_RegisterCommand( "gametype" );
+	// define the scoreboard layout
+	G_ConfigString(CS_SCB_PLAYERTAB_LAYOUT, "%a l1 %n 112 %s 52 %i 52 %l 48 %r l1");
+	G_ConfigString(CS_SCB_PLAYERTAB_TITLES, "AVATAR Name Clan Score Ping R");
 
-    G_Print( "Gametype '" + gametype.title + "' initialized\n" );
+	// add commands
+	G_RegisterCommand("drop");
+	G_RegisterCommand("gametype");
+
+	G_Print("Gametype '" + gametype.title + "' initialized\n");
 }
