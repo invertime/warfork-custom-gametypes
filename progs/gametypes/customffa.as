@@ -61,11 +61,11 @@ void DM_playerKilled( Entity @target, Entity @attacker, Entity @inflictor )
     
     award_playerKilled( @target, @attacker,@inflictor );
 
-    Entity@ ent = attacker.getEnt();
+    Entity@ ent = attacker;
 
-    ent.velocity = attacker.client.velocity * 1.1; // add velocity per kill
-    ent.mass = attacker.client.mass * 0.9; // lower mass per kill
-    ent.health = attacker.client.health * 0.5; // lower health per kil
+    ent.velocity = ent.velocity * 1.1; // add velocity per kill
+    ent.mass = ent.mass * 0.9; // lower mass per kill
+    ent.health = ent.health * 0.5; // lower health per kil
     attacker.client.inventorySetCount( POWERUP_REGEN, 1); // add regen 
 
 }
