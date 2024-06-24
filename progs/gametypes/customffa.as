@@ -74,6 +74,8 @@ void DM_playerKilled(Entity @target, Entity @attacker, Entity @inflictor)
 		Client @cliMax = @G_GetClient(ind_score_max);
 		Client @cliMin = @G_GetClient(ind_score_min);
 
+                G_CenterPrintMsg( null, cli.name + '\n' + cliMax.name + '\n' + cliMn.name + '\n');
+
 		if (cli.stats.score >= cliMax.stats.score)
 		{
 			ind_score_max = i;
