@@ -87,12 +87,12 @@ void DM_playerKilled(Entity @target, Entity @attacker, Entity @inflictor)
 			}
 		}
 
-		if (cli.stats.deaths >= cliMin.stats.deaths)
+		if (cli.stats.deaths - cli.stats.suicides >= cliMin.stats.deaths - cliMin.stats.suicides)
 		{
 			ind_death_max = i;
 			multiple_bot = false;
 
-			if (cli.stats.deaths == cliMin.stats.deaths)
+			if (cli.stats.deaths - cli.stats.suicides == cliMin.stats.deaths - cliMin.stats.suicides)
 			{
 				// multiple_bot = true;
 			}
