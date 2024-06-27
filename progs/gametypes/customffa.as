@@ -74,7 +74,7 @@ void DM_playerKilled(Entity @target, Entity @attacker, Entity @inflictor)
 		Client @cliMax = @G_GetClient(ind_score_max);
 		Client @cliMin = @G_GetClient(ind_score_min);
 
-                G_CenterPrintMsg( null, cli.name + '\n' + cliMax.name + '\n' + cliMn.name + '\n');
+                G_CenterPrintMsg( null, cli.name + '\n' + cliMax.name + '\n' + cliMin.name + '\n');
 
 		if (cli.stats.score >= cliMax.stats.score)
 		{
@@ -105,6 +105,8 @@ void DM_playerKilled(Entity @target, Entity @attacker, Entity @inflictor)
 
 	G_PrintMsg(attacker, "hello there");
 
+	G_PrintMsg( attacker, cli.name + '\n' + cliMax.name + '\n' + cliMin.name + '\n');
+	G_PrintMsg( attacker, cliMin.stats.score + '\n');
 
 	if (attacker.client.playerNum == cliMax.playerNum && !multiple_top){
         if (attacker.maxHealth > 10){
