@@ -63,7 +63,7 @@ void DM_playerKilled(Entity @target, Entity @attacker, Entity @inflictor)
 	// attacker.velocity = attacker.velocity * 1.5;		 // add velocity after kill
 
 	int ind_score_max = 0;
-	int ind_score_min = 0;
+	int ind_death_max = 0;
 	bool multiple_top = false;
 	bool multiple_bot = false;
 
@@ -72,9 +72,9 @@ void DM_playerKilled(Entity @target, Entity @attacker, Entity @inflictor)
 	{
 		Client @cli = @G_GetClient(i);
 		Client @cliMax = @G_GetClient(ind_score_max);
-		Client @cliMin = @G_GetClient(ind_score_min);
+		Client @cliMin = @G_GetClient(ind_death_max);
 
-                G_CenterPrintMsg( null, cli.name + '\n' + cliMax.name + '\n' + cliMin.name + '\n');
+                G_CenterPrintMsg( null, cli.name + '-' + cliMax.name + '-' + cliMin.name + '-');
 
 		if (cli.stats.score >= cliMax.stats.score)
 		{
@@ -87,12 +87,12 @@ void DM_playerKilled(Entity @target, Entity @attacker, Entity @inflictor)
 			}
 		}
 
-		if (cli.stats.score <= cliMin.stats.score)
+		if (cli.stats.deaths >= cliMin.stats.deaths)
 		{
-			ind_score_min = i;
+			ind_death_max = i;
 			multiple_bot = false;
 
-			if (cli.stats.score == cliMin.stats.score)
+			if (cli.stats.deaths == cliMin.stats.deaths)
 			{
 				// multiple_bot = true;
 			}
@@ -101,12 +101,12 @@ void DM_playerKilled(Entity @target, Entity @attacker, Entity @inflictor)
 
 	// nerf or buff if top play is attacker
 	Client @cliMax = @G_GetClient(ind_score_max);
-	Client @cliMin = @G_GetClient(ind_score_min);
+	Client @cliMin = @G_GetClient(ind_death_max);
 
 	G_PrintMsg(attacker, "hello there");
 
-	G_PrintMsg( attacker, cli.name + '\n' + cliMax.name + '\n' + cliMin.name + '\n');
-	G_PrintMsg( attacker, cliMin.stats.score + '\n');
+	G_PrintMsg( attacker, '\n' + cliMax.name + '\n' + cliMin.name + '\n');
+	G_PrintMsg( attacker, cliMin.stats.deaths + '\n');
 
 	if (attacker.client.playerNum == cliMax.playerNum && !multiple_top){
         if (attacker.maxHealth > 10){
@@ -335,14 +335,14 @@ void GT_ThinkRules()
 
 	GENERIC_Think();
 
-	int ind_score_min = 0;
+	int ind_death_max = 0;
 	bool multiple_bot = false;
 
 	// check maxHealth rule
 	for (int i = 0; i < maxClients; i++)
 	{
 		Entity @ent = @G_GetClient(i).getEnt();
-		Entity @ent3 = @G_GetClient(ind_score_min).getEnt();
+		Entity @ent3 = @G_GetClient(ind_death_max).getEnt();
 
 		if (ent.client.state() >= CS_SPAWNED && ent.team != TEAM_SPECTATOR)
 		{
@@ -357,9 +357,9 @@ void GT_ThinkRules()
 			}
 		}
 
-		if (ent.client.stats.score <= ent3.client.stats.score)
+		if (ent3.client.stats.score >= ent.client.stats.score)
 		{
-			ind_score_min = i;
+			ind_death_max = i;
 			multiple_bot = false;
 
 			if (ent.client.stats.score == ent3.client.stats.score)
@@ -373,7 +373,7 @@ void GT_ThinkRules()
 	{
 		Entity @ent = @G_GetClient(i).getEnt();
 
-		if (i == ind_score_min && !multiple_bot)
+		if (i == ind_death_max && !multiple_bot)
 		{
 			ent.client.inventorySetCount(POWERUP_SHELL, 1);
 		}
@@ -451,7 +451,7 @@ void GT_SpawnGametype()
 void GT_InitGametype()
 {
 	gametype.title = "Custom Free for All";
-	gametype.version = "0.1.A";
+	gametype.version = "0.1.min";
 	gametype.author = "MP2I";
 
 	// if the gametype doesn't have a config file, create it
@@ -520,3 +520,4 @@ void GT_InitGametype()
 
 	G_Print("Gametype '" + gametype.title + "' initialized\n");
 }
+
